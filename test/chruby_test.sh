@@ -1,42 +1,65 @@
 . ./test/helper.sh
 
-tearDown()
+function setUp()
+{
+	original_rubies=(${RUBIES[@]})
+}
+
+function tearDown()
 {
 	chruby_reset
+
+	RUBIES=(${original_rubies[@]})
 }
 
-test_chruby_1_9()
+function test_chruby_default_RUBIES()
 {
-	chruby "1.9" >/dev/null
-
-	assertEquals "did not match 1.9" "$TEST_RUBY_ROOT" "$RUBY_ROOT"
+	assertEquals "did not correctly populate RUBIES" \
+		     "$test_ruby_root" \
+		     "${RUBIES[*]}"
 }
 
-test_chruby_multiple_matches()
+function test_chruby_2_0()
 {
-	RUBIES=(/path/to/ruby-1.9.0 "$TEST_RUBY_ROOT")
+	chruby "2.0" >/dev/null
 
-	chruby "1.9" >/dev/null
-
-	assertEquals "did not use the last match" "$TEST_RUBY_ROOT" "$RUBY_ROOT"
+	assertEquals "did not match 2.0" "$test_ruby_root" "$RUBY_ROOT"
 }
 
-test_chruby_system()
+function test_chruby_multiple_matches()
 {
-	chruby "$TEST_RUBY_VERSION" >/dev/null
+	RUBIES=(/path/to/ruby-2.0.0 "$test_ruby_root")
+
+	chruby "2.0" >/dev/null
+
+	assertEquals "did not use the last match" "$test_ruby_root" "$RUBY_ROOT"
+}
+
+function test_chruby_exact_match_first()
+{
+	RUBIES=("$test_ruby_root" "$test_ruby_root-rc1")
+
+	chruby "${test_ruby_root##*/}"
+
+	assertEquals "did not use the exact match" "$test_ruby_root" "$RUBY_ROOT"
+}
+
+function test_chruby_system()
+{
+	chruby "$test_ruby_version" >/dev/null
 	chruby system
 
 	assertNull "did not reset the Ruby" "$RUBY_ROOT"
 }
 
-test_chruby_unknown()
+function test_chruby_unknown()
 {
-	chruby "foo" 2>/dev/null
+	chruby "does_not_exist" 2>/dev/null
 
 	assertEquals "did not return 1" 1 $?
 }
 
-test_chruby_invalid_ruby()
+function test_chruby_invalid_ruby()
 {
 	RUBIES=(/does/not/exist/jruby)
 

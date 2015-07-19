@@ -2,12 +2,12 @@
 # vi: set ft=ruby :
 
 Vagrant::Config.run do |config|
-  # vagrant box add debian-squeeze-amd64 https://dl.dropbox.com/u/1543052/Boxes/DebianSqueeze64.box
+  # vagrant box add debian-wheezy-amd64 https://dl.dropboxusercontent.com/u/67225617/lxc-vagrant/lxc-wheezy64-puppet3-2013-07-27.box
   config.vm.define :debian do |debian|
-    debian.vm.box = 'debian-squeeze-amd64'
+    debian.vm.box = 'debian-wheezy-amd64'
   end
 
-  # vagrant box add ubuntu-12.04-amd64 http://dl.dropbox.com/u/1537815/precise64.box
+  # vagrant box add ubuntu-12.04-amd64 http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box
   config.vm.define :ubuntu do |ubuntu|
     ubuntu.vm.box = 'ubuntu-12.04-amd64'
   end
@@ -27,8 +27,8 @@ Vagrant::Config.run do |config|
     freebsd.vm.box = 'freebsd-9.1-amd64'
   end
 
-  # vagrant box add openbsd-5.0-amd64 https://github.com/downloads/stefancocora/openbsd_amd64-vagrant/openbsd50_amd64.box
+  # vagrant box add openbsd-5.2-amd64 https://dl.dropbox.com/s/5ietqc3thdholuh/openbsd-52-64.box
   config.vm.define :openbsd do |openbsd|
-    openbsd.vm.box = 'openbsd-5.0-amd64'
+    openbsd.vm.box = 'openbsd-5.2-amd64'
   end
 end

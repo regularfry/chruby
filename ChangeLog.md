@@ -1,3 +1,77 @@
+### 0.3.9 / 2014-11-23
+
+#### chruby.sh
+
+* Stop searching `RUBIES` if an exact match is found. (@havenwood)
+
+#### auto.sh
+
+* Fixed a bug where `/.ruby-version` was being ignored. (@havenwood)
+
+#### chruby-exec
+
+* Ensure that all parameters are properly shell-escaped. (@havenwood)
+
+#### scripts/setup.sh
+
+* No longer install [ruby-install](https://github.com/postmodern/ruby-install#readme).
+
+#### scripts/bug_report.sh
+
+* Print `RUBYLIB`, `RUBYOPT`, `RUBYPATH` and `RUBYSHELL` env variables.
+* Include `chruby-exec` in the versions section.
+* Fall back to `-V` if `--version` did not work.
+
+### 0.3.8 / 2013-12-04
+
+#### chruby.sh
+
+* Remove trailing slashes from ruby directories when iterating over `RUBIES`.
+  (@halostatue)
+* Ensure all temporary variables are local or unset.
+
+#### auto.sh
+
+* Ensure that `chruby_auto` can read `.ruby-version` files that do not end with
+  a new-line. (@hosiawak)
+
+#### scripts/setup.sh
+
+* Install ruby-install 0.3.3.
+
+#### scripts/bug_report.sh
+
+* Print `$HOME`, `$RUBY_AUTO_VERSION`.
+* Print `trap -p`, `$preexec_functions` and `$precmd_functions`.
+* Print env variables even when they are empty.
+
+### 0.3.7 / 2013-08-18
+
+* Multiple style changes and optimizations. (@zendeavor)
+* Safely glob the contents of `/opt/rubies` and `~/.rubies`.
+  This prevents nullglob errors under zsh and `.rbx` directories from being
+  added to `RUBIES`.
+* Unset `GEM_PATH` in `chruby_reset` if it has become empty.
+  Allows the RubyGems to use the default `GEM_PATH`.
+* Safely quote `RUBIES[@]` to prevent implicit word-splitting when listing
+ `RUBIES`.
+* Map `-V` to `--version` in `chruby`. (@havenwood)
+* Added benchmarks.
+
+#### auto.sh
+
+* Unset `RUBY_AUTO_VERSION` when loaded. Forces sub-shells to re-detect any
+  `.ruby-version` file. (@KevinSjoberg)
+* No longer export `RUBY_AUTO_VERSION`. Allows new windows in tmux to detect
+  the `.ruby-version` file.
+* Set `RUBY_AUTO_VERSION` even if `.ruby-version` contains an unknown Ruby.
+  Prevents `chruby` from printing errors after every command.
+* Fixed a typo where `RUBY_VERSION_FILE` was still being used. (@KevinSjoberg)
+
+#### chruby-exec
+
+* If stdin is a TTY, then spawn an interactive shell.
+
 ### 0.3.6 / 2013-06-23
 
 * `chruby_use` no longer echos the selected Ruby.

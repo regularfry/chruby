@@ -1,6 +1,8 @@
-pkg/*.tar.gz
-pkg/*.tar.bz2
-pkg/*.zip
-test/rubies
-debian/chruby*
-debian/files
+/doc/
+/pkg/*.tar.gz
+/pkg/*.tar.bz2
+/pkg/*.zip
+/test/opt/rubies
+/test/home/.zcompdump
+/debian/chruby*
+/debian/files

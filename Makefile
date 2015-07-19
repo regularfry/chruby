@@ -1,5 +1,5 @@
 NAME=chruby
-VERSION=0.4.0
+VERSION=0.3.9
 AUTHOR=postmodern
 URL=https://github.com/$(AUTHOR)/$(NAME)
 
@@ -32,7 +32,7 @@ man: share/man/man1/chruby.1
 
 man: share/man/man1/chruby-exec.1
 	git commit -m "Updated the man pages" doc/man/chruby-exec.1.md share/man/man1/chruby-exec.1
-	
+
 download: pkg
 	wget -O $(PKG) $(URL)/archive/v$(VERSION).tar.gz
 
@@ -43,38 +43,47 @@ sign: $(PKG)
 	gpg --sign --detach-sign --armor $(PKG)
 	git add $(PKG).asc
 	git commit $(PKG).asc -m "Added PGP signature for v$(VERSION)"
-	git push
+	git push origin master
 
 verify: $(PKG) $(SIG)
 	gpg --verify $(SIG) $(PKG)
 
 clean:
+	rm -rf test/opt/rubies
 	rm -f $(PKG) $(SIG)
 
 all: $(PKG) $(SIG)
 
-test/rubies:
+check:
+	shellcheck share/$(NAME)/*.sh
+
+test/opt/rubies:
 	./test/setup
 
-test: test/rubies
-	SHELL=`which bash` ./test/runner
-	SHELL=`which zsh`  ./test/runner
+test: test/opt/rubies
+	SHELL=`command -v bash` ./test/runner
+	SHELL=`command -v zsh`  ./test/runner
 
 tag:
-	git push
+	git push origin master
 	git tag -s -m "Releasing $(VERSION)" v$(VERSION)
-	git push --tags
+	git push origin master --tags
 
 release: tag download sign
 
+rpm:
+	rpmdev-setuptree
+	spectool -g -R rpm/chruby.spec
+	rpmbuild -ba rpm/chruby.spec
+
 install:
-	for dir in $(INSTALL_DIRS); do mkdir -p $(INSTALL_PATH)/$$dir; done
-	for file in $(INSTALL_FILES); do cp $$file $(INSTALL_PATH)/$$file; done
-	mkdir -p $(DOC_DIR)
-	cp -r $(DOC_FILES) $(DOC_DIR)/
+	for dir in $(INSTALL_DIRS); do mkdir -p $(DESTDIR)$(PREFIX)/$$dir; done
+	for file in $(INSTALL_FILES); do cp $$file $(DESTDIR)$(PREFIX)/$$file; done
+	mkdir -p $(DESTDIR)$(DOC_DIR)
+	cp -r $(DOC_FILES) $(DESTDIR)$(DOC_DIR)/
 
 uninstall:
-	for file in $(INSTALL_FILES); do rm -f $(INSTALL_PATH)/$$file; done
-	rm -rf $(DOC_DIR)
+	for file in $(INSTALL_FILES); do rm -f $(DESTDIR)$(PREFIX)/$$file; done
+	rm -rf $(DESTDIR)$(DOC_DIR)
 
-.PHONY: build man download sign verify clean test tag release install uninstall all
+.PHONY: build download sign verify clean check test tag release rpm install uninstall all

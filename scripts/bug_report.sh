@@ -2,7 +2,7 @@
 # chruby script to collect environment information for bug reports.
 #
 
-[[ -z "$PS1" ]] && exec $SHELL -i -l $0
+[[ -z "$PS1" ]] && exec "$SHELL" -i -l "$0"
 
 function print_section()
 {
@@ -13,7 +13,7 @@ function print_section()
 
 function indent()
 {
-	echo "    $1"
+	echo "$1" | sed 's/^/    /'
 }
 
 function print_variable()
@@ -25,10 +25,15 @@ function print_variable()
 
 function print_version()
 {
-	if [[ -n $(which $1 2>/dev/null) ]]; then
-		indent "$($1 --version | head -n 1) ($(which $1))"
+	local full_path="$(command -v "$1")"
+
+	if [[ -n "$full_path" ]]; then
+		local version="$(("$1" --version || "$1" -V) 2>/dev/null)"
+
+		indent "$(echo "$version" | head -n 1) [$full_path]"
 	fi
 }
+
 
 print_section "System"
 
@@ -38,30 +43,42 @@ print_version "tmux"
 print_version "zsh"
 print_version "ruby"
 print_version "bundle"
+print_version "chruby-exec"
 
 print_section "Environment"
 
 print_variable "CHRUBY_VERSION"
 print_variable "SHELL"
 print_variable "PATH"
+print_variable "HOME"
 
-[[ -n "$PROMPT_COMMAND"    ]] && print_variable "PROMPT_COMMAND"
-[[ -n "$preexec_functions" ]] && print_variable "preexec_functions"
-[[ -n "$precmd_functions"  ]] && print_variable "precmd_functions"
+print_variable "RUBIES" "(${RUBIES[*]})"
+print_variable "RUBY_ROOT"
+print_variable "RUBY_VERSION"
+print_variable "RUBY_ENGINE"
+print_variable "RUBY_AUTO_VERSION"
+print_variable "RUBYLIB"
+print_variable "RUBYOPT"
+print_variable "RUBYPATH"
+print_variable "RUBYSHELL"
+print_variable "GEM_ROOT"
+print_variable "GEM_HOME"
+print_variable "GEM_PATH"
 
-[[ -n "$RUBIES"       ]] && print_variable "RUBIES" "(${RUBIES[*]})"
-[[ -n "$RUBY_ROOT"    ]] && print_variable "RUBY_ROOT"
-[[ -n "$RUBY_VERSION" ]] && print_variable "RUBY_VERSION"
-[[ -n "$RUBY_ENGINE"  ]] && print_variable "RUBY_ENGINE"
-[[ -n "$GEM_ROOT"     ]] && print_variable "GEM_ROOT"
-[[ -n "$GEM_HOME"     ]] && print_variable "GEM_HOME"
-[[ -n "$GEM_PATH"     ]] && print_variable "GEM_PATH"
+if [[ -n "$ZSH_VERSION" ]]; then
+	print_section "Hooks"
+	print_variable "preexec_functions" "(${preexec_functions[*]})"
+	print_variable "precmd_functions" "(${precmd_functions[*]})"
+elif [[ -n "$BASH_VERSION" ]]; then
+	print_section "Hooks"
+	indent "$(trap -p)"
+fi
 
 if [[ -f .ruby-version ]]; then
 	print_section ".ruby-version"
-	echo "    $(cat .ruby-version)"
+	echo "    $(< .ruby-version)"
 fi
 
 print_section "Aliases"
 
-alias | sed 's/^/    /'
+indent "$(alias)"

@@ -1,15 +1,13 @@
-unset RUBY_VERSION_FILE
+unset RUBY_AUTO_VERSION
 
 function chruby_auto() {
-	local dir="$PWD"
-	local version_file
-	local version
+	local dir="$PWD/" version
 
 	until [[ -z "$dir" ]]; do
-		version_file="$dir/.ruby-version"
+		dir="${dir%/*}"
 
-		if [[ -f "$version_file" ]]; then
-			version=`cat "$version_file"`
+		if { read -r version <"$dir/.ruby-version"; } 2>/dev/null || [[ -n "$version" ]]; then
+			version="${version%%[[:space:]]}"
 
 			if [[ "$version" == "$RUBY_AUTO_VERSION" ]]; then return
 			else
@@ -18,8 +16,6 @@ function chruby_auto() {
 				return $?
 			fi
 		fi
-
-		dir="${dir%/*}"
 	done
 
 	if [[ -n "$RUBY_AUTO_VERSION" ]]; then
